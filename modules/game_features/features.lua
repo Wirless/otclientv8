@@ -18,10 +18,21 @@ function updateFeatures(version)
     --g_game.enableFeature(GameMinimapLimitedToSingleFloor) -- it will generate minimap only for current floor
     --g_game.enableFeature(GameSpritesAlphaChannel)
     
-    if(version >= 770) then
+       if(version >= 770) then
         g_game.enableFeature(GameLooktypeU16)
         g_game.enableFeature(GameMessageStatements)
         g_game.enableFeature(GameLoginPacketEncryption)
+		g_game.enableFeature(GamePlayerAddons)
+		g_game.enableFeature(GamePlayerMounts)
+		g_game.enableFeature(GameNewOutfitProtocol)
+		g_game.enableFeature(GameExtendedOpcode)
+		g_game.enableFeature(GameWingsAndAura)
+		g_game.enableFeature(GameAuraFrontAndBack)
+		g_game.enableFeature(GameExtendedClientPing)
+		g_game.enableFeature(GameIdleAnimations)
+		g_game.enableFeature(GameEnhancedAnimations)
+		g_game.enableFeature(GameSpritesU32)
+		--g_game.enableFeature(GameClientPing)
     end
 
     if(version >= 780) then

@@ -1,0 +1,10 @@
+Module
+  name: game_bank
+  description: Advanced banking system
+  author: Claude
+  website: https://banking.live/
+  sandboxed: true
+  autoload: true
+  scripts: [ "bank.lua" ]
+  @onLoad: init()
+  @onUnload: terminate() 

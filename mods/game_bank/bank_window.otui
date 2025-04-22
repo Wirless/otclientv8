@@ -1,0 +1,172 @@
+MainWindow
+  id: bankWindow
+  !text: tr('Bank')
+  size: 350 420
+  @onEscape: modules.game_bank.hide()
+
+  Panel
+    id: topPanel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 120
+    margin-top: 10
+    margin-left: 15
+    margin-right: 15
+
+    Label
+      id: balanceLabel
+      !text: tr('Your Balance:')
+      text-align: center
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      font: verdana-11px-rounded
+      
+    Label
+      id: balanceValue
+      !text: tr('0 gold')
+      text-align: center
+      anchors.top: balanceLabel.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 5
+      font: verdana-14px-rounded
+      color: #ffba03
+
+    UIItem
+      id: goldIcon
+      anchors.top: balanceValue.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 15
+      item-id: 3031
+      virtual: true
+
+  HorizontalSeparator
+    id: separator1
+    anchors.top: topPanel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+    margin-left: 15
+    margin-right: 15
+
+  Label
+    id: amountLabel
+    !text: tr('Amount:')
+    anchors.top: separator1.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 20
+    margin-left: 15
+    margin-right: 15
+    text-align: center
+    font: verdana-11px-rounded
+  
+  TextEdit
+    id: amountEdit
+    anchors.top: amountLabel.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 5
+    width: 120
+    font: verdana-11px-rounded
+    text-align: center
+    
+  HorizontalSeparator
+    id: separator2
+    anchors.top: amountEdit.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 20
+    margin-left: 15
+    margin-right: 15
+  
+  Panel
+    id: buttonPanel
+    anchors.top: separator2.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 50
+    margin-top: 15
+    
+    UIButton
+      id: depositButton
+      !text: tr('Deposit')
+      width: 110
+      height: 35
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+      margin-left: 30
+      @onClick: modules.game_bank.deposit()
+      font: verdana-11px-rounded
+      
+    UIButton
+      id: withdrawButton
+      !text: tr('Withdraw')
+      width: 110
+      height: 35
+      anchors.right: parent.right
+      anchors.verticalCenter: parent.verticalCenter
+      margin-right: 30
+      @onClick: modules.game_bank.withdraw()
+      font: verdana-11px-rounded
+  
+  Panel
+    id: allButtonPanel
+    anchors.top: buttonPanel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 50
+    margin-top: 10
+    
+    UIButton
+      id: depositAllButton
+      !text: tr('Deposit All')
+      width: 110
+      height: 35
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+      margin-left: 30
+      @onClick: modules.game_bank.depositAll()
+      font: verdana-11px-rounded
+      
+    UIButton
+      id: withdrawAllButton
+      !text: tr('Withdraw All')
+      width: 110
+      height: 35
+      anchors.right: parent.right
+      anchors.verticalCenter: parent.verticalCenter
+      margin-right: 30
+      @onClick: modules.game_bank.withdrawAll()
+      font: verdana-11px-rounded
+  
+  HorizontalSeparator
+    id: separator3
+    anchors.top: allButtonPanel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 20
+    margin-left: 15
+    margin-right: 15
+
+  Label
+    id: statusLabel
+    text-align: center
+    anchors.top: separator3.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 15
+    color: #ffffff
+    font: verdana-11px-rounded
+
+  UIButton
+    id: closeButton
+    !text: tr('Close')
+    width: 80
+    height: 25
+    anchors.bottom: parent.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: 10
+    @onClick: modules.game_bank.hide()
+    font: verdana-11px-rounded 

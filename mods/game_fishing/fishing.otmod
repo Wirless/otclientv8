@@ -1,0 +1,10 @@
+Module
+  name: game_fishing
+  description: Fishing minigame
+  author: Idler & Claude
+  website: https://idler.live
+  sandboxed: true
+  autoload: true
+  scripts: [ fishing ]
+  @onLoad: init()
+  @onUnload: terminate() 

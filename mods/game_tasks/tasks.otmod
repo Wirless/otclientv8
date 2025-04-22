@@ -1,0 +1,11 @@
+Module
+  name: game_tasks
+  description: Tasks window
+  author: Oen
+  version: 1.0.0
+
+  autoload: true
+  sandboxed: true
+  scripts: [ tasks ]
+  @onLoad: init()
+  @onUnload: terminate()

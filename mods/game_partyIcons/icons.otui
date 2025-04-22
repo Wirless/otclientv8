@@ -1,0 +1,13 @@
+PlayerIcon < UIWidget
+  id: icon
+  focusable: false
+  phantom: true
+  size: 21 21
+
+  Label
+    id: name
+    width: 80
+    color: #6176ff
+    font: verdana-11px-rounded
+    text-align: center
+    text: Rekzai

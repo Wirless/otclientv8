@@ -1,0 +1,10 @@
+Module
+  name: game_tasks_idler
+  description: Idle rewards system for players
+  author: Claude
+  website: https://idler.live/
+  sandboxed: true
+  autoload: true
+  scripts: [ "tasks_idler.lua" ]
+  @onLoad: init()
+  @onUnload: terminate() 

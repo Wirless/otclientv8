@@ -1,0 +1,140 @@
+MiniPanel < Panel
+  text-offset: 0 2
+  text-align: top
+  image-source: /images/ui/miniwindow
+  image-border: 4
+  image-border-top: 20
+  image-border-bottom: 4
+  padding-left: 4
+  padding-bottom: 3
+  padding-top: 18
+  padding-right: 2
+
+MainWindow
+  id: idlerWindow
+  !text: tr('Idle Rewards')
+  size: 500 400
+  @onEscape: modules.game_tasks_idler.hide()
+
+  UIWidget
+    id: background
+    anchors.fill: parent
+    image-source: /images/ui/panel_flat
+    image-border: 6
+    
+  Label
+    id: titleLabel
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 20
+    text: Idle Rewards System
+    font: verdana-11px-rounded
+    color: #FFFFFF
+    text-auto-resize: true
+
+  Label
+    id: infoLabel
+    anchors.top: titleLabel.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 10
+    text: Click the buttons below to interact with the system
+    font: verdana-11px-rounded
+    color: #DDDDDD
+    text-auto-resize: true
+
+  Button
+    id: rewardButton
+    !text: tr('CLAIM GOLD REWARD')
+    anchors.top: infoLabel.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 30
+    width: 400
+    height: 70
+    font: verdana-11px-rounded
+    text-offset: 0 -15
+    @onClick: modules.game_tasks_idler.claimReward()
+    
+    UIWidget
+      id: coinIcon
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.bottom: parent.bottom
+      anchors.bottomMargin: 12
+      image-source: /images/game/items/3031
+      size: 32 32
+
+  Button
+    id: refreshButton
+    !text: tr('REFRESH BALANCE')
+    anchors.top: rewardButton.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 20
+    width: 400
+    height: 70
+    font: verdana-11px-rounded
+    text-offset: 0 -15
+    @onClick: modules.game_tasks_idler.requestGoldStatus()
+    
+    UIWidget
+      id: refreshIcon
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.bottom: parent.bottom
+      anchors.bottomMargin: 12
+      image-source: /images/game/items/3031
+      size: 32 32
+
+  Button
+    id: goldButton
+    !text: tr('GET 1 GOLD')
+    anchors.top: refreshButton.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 20
+    width: 400
+    height: 70
+    font: verdana-11px-rounded
+    text-offset: 0 -15
+    @onClick: modules.game_tasks_idler.claimGold()
+    
+    UIWidget
+      id: goldIcon
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.bottom: parent.bottom
+      anchors.bottomMargin: 12
+      image-source: /images/game/items/3031
+      size: 32 32
+  
+  Panel
+    id: statusPanel
+    anchors.bottom: parent.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: 20
+    height: 45
+    width: 400
+      
+    Label
+      id: statusLabel
+      anchors.top: parent.top
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: Ready to claim rewards
+      font: verdana-11px-rounded
+      color: #00FF00
+      text-auto-resize: true
+      
+    Label
+      id: goldBalanceLabel
+      anchors.top: statusLabel.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 5
+      text: Check your gold balance
+      font: verdana-11px-rounded
+      color: #FFD700
+      text-auto-resize: true
+
+  Button
+    id: closeButton
+    !text: tr('Close')
+    width: 64
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    margin-right: 10
+    margin-bottom: 10
+    @onClick: modules.game_tasks_idler.hide() 

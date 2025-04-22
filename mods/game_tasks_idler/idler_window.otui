@@ -1,0 +1,350 @@
+MiniPanel < Panel
+  text-offset: 0 2
+  text-align: top
+  image-source: /images/ui/miniwindow
+  image-border: 4
+  image-border-top: 20
+  image-border-bottom: 4
+  padding-left: 4
+  padding-bottom: 3
+  padding-top: 18
+  padding-right: 2
+
+FlatPanel < UIWidget
+  size: 80 20
+  image-source: /images/ui/panel_flat
+  image-border: 2
+  padding: 1
+
+ActionButton < UIButton
+  font: verdana-11px-antialised
+  color: #dfdfdfff
+  size: 110 34
+  image-source: /images/ui/button
+  image-color: #ababab
+  image-clip: 0 0 22 23
+  image-border: 3
+  padding-left: 10
+  padding-right: 10
+  opacity: 1.0
+
+  $hover !disabled:
+    image-color: #dfdfdf
+
+  $pressed:
+    image-clip: 0 46 22 23
+
+  $disabled:
+    color: #dfdfdf88
+    opacity: 0.8
+
+MainWindow
+  id: idlerWindow
+  !text: tr('Idle Rewards')
+  size: 520 440
+  @onEscape: modules.game_tasks_idler.hide()
+
+  MiniPanel
+    id: craftPanel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: separator.top
+    text: Idle Rewards System
+    margin-bottom: 10
+
+    Panel
+      id: infoPanel
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.bottom: parent.bottom
+      margin-top: 20
+      margin-left: 10
+      width: 140
+      
+      Label
+        id: infoTitle
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        text: Information
+        text-align: center
+        color: #dfdfdf
+      
+      TextEdit
+        id: infoText
+        anchors.top: infoTitle.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: upgradeTitle.top
+        margin-top: 5
+        margin-bottom: 10
+        text: "Welcome to the Idle Rewards System!\n\nClaim your rewards every 60 seconds.\n\nRefresh your balance to see your current gold.\n\nGet gold instantly with the bonus button."
+        color: #afafaf
+        editable: false
+        vertical-scrollbar: infoScrollBar
+        text-wrap: true
+        
+      VerticalScrollBar
+        id: infoScrollBar
+        anchors.top: infoText.top
+        anchors.bottom: infoText.bottom
+        anchors.right: infoText.right
+        step: 14
+        pixels-scroll: true
+        
+      Label
+        id: upgradeTitle
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: upgradeCostPanel.top
+        margin-bottom: 5
+        text: Click Upgrades
+        text-align: center
+        color: #dfdfdf
+        
+      Panel
+        id: upgradeCostPanel
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: upgradeButton.top
+        height: 25
+        margin-bottom: 5
+        
+        UIItem
+          id: costIcon
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+          margin-left: 10
+          size: 20 20
+          item-id: 3031
+          virtual: true
+        
+        Label
+          id: costLabel
+          anchors.left: costIcon.right
+          anchors.right: parent.right
+          anchors.verticalCenter: parent.verticalCenter
+          margin-left: 5
+          text: Cost: 1000 gold
+          text-align: left
+          color: #afafaf
+      
+      UIButton
+        id: upgradeButton
+        !text: tr('Upgrade Click')
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: currentClickPanel.top
+        margin-left: 10
+        margin-right: 10
+        margin-bottom: 5
+        height: 32
+        font: verdana-11px-antialised
+        color: #dfdfdfff
+        opacity: 0.5
+        enabled: false
+        image-source: /images/ui/button_rounded
+        image-color: #3c6e71
+        @onClick: modules.game_tasks_idler.upgradeGoldClick()
+        
+      Panel
+        id: currentClickPanel
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 25
+        margin-bottom: 10
+        
+        UIItem
+          id: clickIcon
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+          margin-left: 10
+          size: 20 20
+          item-id: 3031
+          virtual: true
+        
+        Label
+          id: clickValueLabel
+          anchors.left: clickIcon.right
+          anchors.right: parent.right
+          anchors.verticalCenter: parent.verticalCenter
+          margin-left: 5
+          text: Value: 1 per click
+          text-align: left
+          color: #afafaf
+
+    VerticalSeparator
+      anchors.top: infoPanel.top
+      anchors.bottom: infoPanel.bottom
+      anchors.left: infoPanel.right
+      margin-left: 10
+
+    UIItem
+      id: craftOutcome
+      anchors.top: parent.top
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 70
+      item-id: 3031
+      virtual: true
+
+    Panel
+      id: craftLine1
+      anchors.top: craftOutcome.top
+      anchors.right: craftOutcome.left
+      margin-top: -31
+      margin-right: 5
+      image-source: /images/crafting/craft_line1
+
+    Panel
+      id: craftLine2
+      anchors.top: craftOutcome.top
+      anchors.right: craftOutcome.left
+      margin-top: 0
+      margin-right: 5
+      image-source: /images/crafting/craft_line5
+
+    Panel
+      id: craftLine3
+      anchors.top: craftOutcome.top
+      anchors.right: craftOutcome.left
+      margin-top: 31
+      margin-right: 5
+      image-source: /images/crafting/craft_line3
+
+    Panel
+      id: craftLine4
+      anchors.top: craftOutcome.top
+      anchors.left: craftOutcome.right
+      margin-top: -31
+      margin-left: 5
+      image-source: /images/crafting/craft_line4
+
+    Panel
+      id: craftLine5
+      anchors.top: craftOutcome.top
+      anchors.left: craftOutcome.right
+      margin-top: 0
+      margin-left: 5
+      image-source: /images/crafting/craft_line5
+
+    Panel
+      id: craftLine6
+      anchors.top: craftOutcome.top
+      anchors.left: craftOutcome.right
+      margin-top: 31
+      margin-left: 5
+      image-source: /images/crafting/craft_line6
+
+    Label
+      id: statusLabel
+      anchors.top: craftOutcome.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 20
+      text-align: center
+      width: 250
+      text: Ready to claim rewards!
+      color: #00FF00
+
+    Label
+      id: balanceTitle
+      anchors.top: statusLabel.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 20
+      text: Bank Balance
+      text-align: center
+      color: #afafaf
+
+    FlatPanel
+      id: balancePanel
+      anchors.top: balanceTitle.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 5
+      size: 160 20
+
+      UIItem
+        anchors.top: parent.top
+        anchors.left: parent.left
+        margin-top: -10
+        margin-left: -10
+        size: 34 34
+        padding: 1
+        item-id: 3031
+        virtual: true
+      
+      Label
+        id: playerMoney
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        margin-right: 8
+        text-align: right
+        text: 0
+
+    Label
+      id: timerTitle
+      anchors.bottom: parent.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-bottom: 30
+      text: Next Reward In
+      text-align: center
+      color: #afafaf
+
+    Label
+      id: timerDisplay
+      anchors.bottom: parent.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-bottom: 10
+      text: "00:00"
+      text-align: center
+      font: verdana-11px-rounded
+      color: #dfdfdf
+
+  HorizontalSeparator
+    id: separator
+    anchors.bottom: buttonPanel.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-bottom: 10
+
+  Panel
+    id: buttonPanel
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    height: 50
+    margin-bottom: 10
+
+    ActionButton
+      id: rewardButton
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+      margin-left: 10
+      text: Claim Reward
+      @onClick: modules.game_tasks_idler.claimReward()
+
+    ActionButton
+      id: refreshButton
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.verticalCenter: parent.verticalCenter
+      text: Refresh Balance
+      @onClick: modules.game_tasks_idler.requestGoldStatus()
+
+    ActionButton
+      id: goldButton
+      anchors.right: parent.right
+      anchors.verticalCenter: parent.verticalCenter
+      margin-right: 10
+      text: Get 1 Gold
+      @onClick: modules.game_tasks_idler.claimGold()
+
+  Button
+    id: closeButton
+    !text: tr('Close')
+    width: 64
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    margin-right: 10
+    margin-bottom: 60
+    @onClick: modules.game_tasks_idler.hide() 
