@@ -2,14 +2,18 @@ vipWindow = nil
 vipButton = nil
 addVipWindow = nil
 editVipWindow = nil
+addGroupWindow = nil
 vipInfo = {}
+vipGroups = {}
+currentCharacter = nil
 
 function init()
   connect(g_game, {
-    onGameStart = refresh,
-    onGameEnd = clear,
+    onGameStart = onGameStart,
+    onGameEnd = onGameEnd,
     onAddVip = onAddVip,
-    onVipStateChange = onVipStateChange
+    onVipStateChange = onVipStateChange,
+    onLogin = onLogin  
   })
 
   Keybind.new("Windows", "Toggle VIP list", "Ctrl+P", "")
@@ -27,6 +31,7 @@ function init()
   if not g_game.getFeature(GameAdditionalVipInfo) then
     loadVipInfo()
   end
+  
   refresh()
   vipWindow:setup()
 end
@@ -35,15 +40,18 @@ function terminate()
   Keybind.delete("Windows", "Toggle VIP list")
 
   disconnect(g_game, {
-    onGameStart = refresh,
-    onGameEnd = clear,
+    onGameStart = onGameStart,
+    onGameEnd = onGameEnd,
     onAddVip = onAddVip,
-    onVipStateChange = onVipStateChange
+    onVipStateChange = onVipStateChange,
+    onLogin = onLogin
   })
 
   if not g_game.getFeature(GameAdditionalVipInfo) then
     saveVipInfo()
   end
+  
+  saveVipGroups()
 
   if addVipWindow then
     addVipWindow:destroy()
@@ -52,9 +60,29 @@ function terminate()
   if editVipWindow then
     editVipWindow:destroy()
   end
+  
+  if addGroupWindow then
+    addGroupWindow:destroy()
+  end
 
   vipWindow:destroy()
   vipButton:destroy()
+end
+
+function onLogin(localPlayer, loginWidget)
+  if localPlayer then
+    currentCharacter = localPlayer:getName()
+    loadVipGroups()
+  end
+end
+
+function onGameStart()
+  refresh()
+end
+
+function onGameEnd()
+  saveVipGroups()
+  clear()
 end
 
 function loadVipInfo()
@@ -72,14 +100,88 @@ function saveVipInfo()
   g_settings.mergeNode('VipList', settings)
 end
 
+function loadVipGroups()
+  vipGroups = {}
+  
+  if not currentCharacter then
+    local localPlayer = g_game.getLocalPlayer()
+    if localPlayer then
+      currentCharacter = localPlayer:getName()
+    else
+      return
+    end
+  end
+  
+  local file = io.open("viplist_" .. currentCharacter .. ".txt", "r")
+  if not file then
+    return
+  end
+  
+  for line in file:lines() do
+    local groupName, vipName = line:match("^GROUP:(.+),VIP:(.+)$")
+    if groupName and vipName then
+      if not vipGroups[groupName] then
+        vipGroups[groupName] = {}
+      end
+      table.insert(vipGroups[groupName], vipName)
+    end
+  end
+  
+  file:close()
+  refreshGroups()
+end
+
+function saveVipGroups()
+  if not currentCharacter then
+    local localPlayer = g_game.getLocalPlayer()
+    if localPlayer then
+      currentCharacter = localPlayer:getName()
+    else
+      return
+    end
+  end
+  
+  local file = io.open("viplist_" .. currentCharacter .. ".txt", "w")
+  if not file then
+    return
+  end
+  
+  for groupName, vips in pairs(vipGroups) do
+    for _, vipName in ipairs(vips) do
+      file:write("GROUP:" .. groupName .. ",VIP:" .. vipName .. "\n")
+    end
+  end
+  
+  file:close()
+end
 
 function refresh()
   clear()
-  for id,vip in pairs(g_game.getVips()) do
+  refreshGroups()
+  
+  for id, vip in pairs(g_game.getVips()) do
     onAddVip(id, unpack(vip))
   end
 
   vipWindow:setContentMinimumHeight(38)
+end
+
+function refreshGroups()
+  local vipList = vipWindow:getChildById('contentsPanel')
+  
+  -- Remove all group labels first
+  local children = vipList:getChildren()
+  for i = 1, #children do
+    local child = children[i]
+    if child:getId():find("^group_") then
+      vipList:removeChild(child)
+    end
+  end
+  
+  -- Add all groups
+  for groupName, _ in pairs(vipGroups) do
+    addGroupLabel(groupName)
+  end
 end
 
 function clear()
@@ -104,6 +206,12 @@ end
 function createAddWindow()
   if not addVipWindow then
     addVipWindow = g_ui.displayUI('addvip')
+  end
+end
+
+function createAddGroupWindow()
+  if not addGroupWindow then
+    addGroupWindow = g_ui.displayUI('addgroup')
   end
 end
 
@@ -184,9 +292,71 @@ function destroyAddWindow()
   addVipWindow = nil
 end
 
+function destroyAddGroupWindow()
+  addGroupWindow:destroy()
+  addGroupWindow = nil
+end
+
 function addVip()
   g_game.addVip(addVipWindow:getChildById('name'):getText())
   destroyAddWindow()
+end
+
+function addGroup()
+  local groupName = addGroupWindow:getChildById('groupName'):getText()
+  if groupName and groupName:len() > 0 then
+    if not vipGroups[groupName] then
+      vipGroups[groupName] = {}
+      addGroupLabel(groupName)
+      saveVipGroups()
+    end
+  end
+  destroyAddGroupWindow()
+end
+
+function addGroupLabel(groupName)
+  local vipList = vipWindow:getChildById('contentsPanel')
+  
+  -- Create the group label
+  local label = g_ui.createWidget('VipGroupLabel')
+  label:setId('group_' .. groupName)
+  label:setText(groupName)
+  label.onMousePress = onVipGroupLabelMousePress
+  label:setDraggable(false)
+  
+  -- Insert at appropriate position (groups should be at the top)
+  local inserted = false
+  for i = 1, vipList:getChildCount() do
+    local child = vipList:getChildByIndex(i)
+    if not child:getId():find("^group_") then
+      vipList:insertChild(i, label)
+      inserted = true
+      break
+    end
+  end
+  
+  if not inserted then
+    vipList:addChild(label)
+  end
+  
+  return label
+end
+
+function removeGroup(groupName)
+  if not vipGroups[groupName] then
+    return
+  end
+  
+  vipGroups[groupName] = nil
+  
+  local vipList = vipWindow:getChildById('contentsPanel')
+  local groupLabel = vipList:getChildById('group_' .. groupName)
+  if groupLabel then
+    vipList:removeChild(groupLabel)
+  end
+  
+  saveVipGroups()
+  refresh()
 end
 
 function removeVip(widgetOrName)
@@ -213,10 +383,54 @@ function removeVip(widgetOrName)
 
   if widget then
     local id = widget:getId():sub(4)
+    local name = widget:getText()
+    
+    -- Remove from any groups if present
+    for groupName, vips in pairs(vipGroups) do
+      for i, vipName in ipairs(vips) do
+        if vipName == name then
+          table.remove(vipGroups[groupName], i)
+          break
+        end
+      end
+    end
+    
     g_game.removeVip(id)
     vipList:removeChild(widget)
     if vipInfo[id] and g_game.getFeature(GameAdditionalVipInfo) then
       vipInfo[id] = nil
+    end
+    
+    saveVipGroups()
+  end
+end
+
+function addVipToGroup(vipName, groupName)
+  if not vipGroups[groupName] then
+    vipGroups[groupName] = {}
+  end
+  
+  -- Check if already in the group
+  for _, name in ipairs(vipGroups[groupName]) do
+    if name == vipName then
+      return
+    end
+  end
+  
+  table.insert(vipGroups[groupName], vipName)
+  saveVipGroups()
+end
+
+function removeVipFromGroup(vipName, groupName)
+  if not vipGroups[groupName] then
+    return
+  end
+  
+  for i, name in ipairs(vipGroups[groupName]) do
+    if name == vipName then
+      table.remove(vipGroups[groupName], i)
+      saveVipGroups()
+      return
     end
   end
 end
@@ -262,7 +476,7 @@ function onAddVip(id, name, state, description, iconId, notify)
   local childrenCount = vipList:getChildCount()
   for i=1,childrenCount do
     local child = vipList:getChildByIndex(i)
-    if child:getText() == name then
+    if child:getText() == name and not child:getId():find("^group_") then
       return -- don't add duplicated vips
     end
   end
@@ -310,32 +524,55 @@ function onAddVip(id, name, state, description, iconId, notify)
     label:setVisible(false)
   end
 
-  local nameLower = name:lower()
-  local childrenCount = vipList:getChildCount()
-
-  for i=1,childrenCount do
-    local child = vipList:getChildByIndex(i)
-    if (state == VipState.Online and child.vipState ~= VipState.Online and getSortedBy() == 'status')
-        or (label.iconId > child.iconId and getSortedBy() == 'type') then
-      vipList:insertChild(i, label)
-      return
+  -- Check if this VIP belongs to a group
+  local belongsToGroup = false
+  for groupName, vips in pairs(vipGroups) do
+    for _, vipName in ipairs(vips) do
+      if vipName == name then
+        belongsToGroup = true
+        -- Insert below the appropriate group
+        local groupWidget = vipList:getChildById('group_' .. groupName)
+        if groupWidget then
+          local index = vipList:getChildIndex(groupWidget)
+          vipList:insertChild(index + 1, label)
+          return
+        end
+      end
     end
+  end
+  
+  -- If not in a group, add it normally based on sorting
+  if not belongsToGroup then
+    local nameLower = name:lower()
+    local childrenCount = vipList:getChildCount()
 
-    if (((state ~= VipState.Online and child.vipState ~= VipState.Online) or (state == VipState.Online and child.vipState == VipState.Online)) and getSortedBy() == 'status')
-        or (label.iconId == child.iconId and getSortedBy() == 'type') or getSortedBy() == 'name' then
-
-      local childText = child:getText():lower()
-      local length = math.min(childText:len(), nameLower:len())
-
-      for j=1,length do
-        if nameLower:byte(j) < childText:byte(j) then
+    for i=1,childrenCount do
+      local child = vipList:getChildByIndex(i)
+      -- Skip group labels in sorting
+      if not child:getId():find("^group_") then
+        if (state == VipState.Online and child.vipState ~= VipState.Online and getSortedBy() == 'status')
+            or (label.iconId > child.iconId and getSortedBy() == 'type') then
           vipList:insertChild(i, label)
           return
-        elseif nameLower:byte(j) > childText:byte(j) then
-          break
-        elseif j == nameLower:len() then -- We are at the end of nameLower, and its shorter than childText, thus insert before
-          vipList:insertChild(i, label)
-          return
+        end
+
+        if (((state ~= VipState.Online and child.vipState ~= VipState.Online) or (state == VipState.Online and child.vipState == VipState.Online)) and getSortedBy() == 'status')
+            or (label.iconId == child.iconId and getSortedBy() == 'type') or getSortedBy() == 'name' then
+
+          local childText = child:getText():lower()
+          local length = math.min(childText:len(), nameLower:len())
+
+          for j=1,length do
+            if nameLower:byte(j) < childText:byte(j) then
+              vipList:insertChild(i, label)
+              return
+            elseif nameLower:byte(j) > childText:byte(j) then
+              break
+            elseif j == nameLower:len() then -- We are at the end of nameLower, and its shorter than childText, thus insert before
+              vipList:insertChild(i, label)
+              return
+            end
+          end
         end
       end
     end
@@ -371,6 +608,7 @@ function onVipListMousePress(widget, mousePos, mouseButton)
   local menu = g_ui.createWidget('PopupMenu')
   menu:setGameMenu(true)
   menu:addOption(tr('Add new VIP'), function() createAddWindow() end)
+  menu:addOption(tr('Add new Group'), function() createAddGroupWindow() end)
 
   menu:addSeparator()
   if not isHiddingOffline() then
@@ -396,24 +634,95 @@ function onVipListMousePress(widget, mousePos, mouseButton)
   return true
 end
 
+function onVipGroupLabelMousePress(widget, mousePos, mouseButton)
+  if mouseButton ~= MouseRightButton then return end
+  
+  local groupName = widget:getText()
+
+  local menu = g_ui.createWidget('PopupMenu')
+  menu:setGameMenu(true)
+  menu:addOption(tr('Add new VIP'), function() createAddWindow() end)
+  menu:addOption(tr('Add new Group'), function() createAddGroupWindow() end)
+  menu:addSeparator()
+  menu:addOption(tr('Remove Group'), function() removeGroup(groupName) end)
+  menu:addSeparator()
+  if not isHiddingOffline() then
+    menu:addOption(tr('Hide Offline'), function() hideOffline(true) end)
+  else
+    menu:addOption(tr('Show Offline'), function() hideOffline(false) end)
+  end
+
+  menu:display(mousePos)
+
+  return true
+end
+
 function onVipListLabelMousePress(widget, mousePos, mouseButton)
   if mouseButton ~= MouseRightButton then return end
 
   local vipList = vipWindow:getChildById('contentsPanel')
+  local name = widget:getText()
 
   local menu = g_ui.createWidget('PopupMenu')
   menu:setGameMenu(true)
-  menu:addOption(tr('Send Message'), function() g_game.openPrivateChannel(widget:getText()) end)
+  menu:addOption(tr('Send Message'), function() g_game.openPrivateChannel(name) end)
   menu:addOption(tr('Add new VIP'), function() createAddWindow() end)
-  menu:addOption(tr('Edit %s', widget:getText()), function() if widget then createEditWindow(widget) end end)
-  menu:addOption(tr('Remove %s', widget:getText()), function() if widget then removeVip(widget) end end)
+  menu:addOption(tr('Add new Group'), function() createAddGroupWindow() end)
+  menu:addOption(tr('Edit %s', name), function() if widget then createEditWindow(widget) end end)
+  menu:addOption(tr('Remove %s', name), function() if widget then removeVip(widget) end end)
   menu:addSeparator()
-  menu:addOption(tr('Copy Name'), function() g_window.setClipboardText(widget:getText()) end)
+  
+  -- Group management submenu
+  local groupSubmenu = menu:addSubmenu(tr('Group Management'))
+  
+  -- Add to group
+  for groupName, _ in pairs(vipGroups) do
+    -- Check if the VIP is already in this group
+    local isInGroup = false
+    if vipGroups[groupName] then
+      for _, vipName in ipairs(vipGroups[groupName]) do
+        if vipName == name then
+          isInGroup = true
+          break
+        end
+      end
+    end
+    
+    -- Only show groups the VIP is not already in
+    if not isInGroup then
+      groupSubmenu:addOption(tr('Add to "%s"', groupName), function() 
+        addVipToGroup(name, groupName)
+        refresh()
+      end)
+    end
+  end
+  
+  -- Remove from groups
+  local belongsToGroups = {}
+  for groupName, vips in pairs(vipGroups) do
+    for _, vipName in ipairs(vips) do
+      if vipName == name then
+        table.insert(belongsToGroups, groupName)
+      end
+    end
+  end
+  
+  if #belongsToGroups > 0 then
+    for _, groupName in ipairs(belongsToGroups) do
+      groupSubmenu:addOption(tr('Remove from "%s"', groupName), function() 
+        removeVipFromGroup(name, groupName)
+        refresh()
+      end)
+    end
+  end
+  
+  menu:addSeparator()
+  menu:addOption(tr('Copy Name'), function() g_window.setClipboardText(name) end)
 
   if modules.game_console.getOwnPrivateTab() then
     menu:addSeparator()
-    menu:addOption(tr('Invite to private chat'), function() g_game.inviteToOwnChannel(widget:getText()) end)
-    menu:addOption(tr('Exclude from private chat'), function() g_game.excludeFromOwnChannel(widget:getText()) end)
+    menu:addOption(tr('Invite to private chat'), function() g_game.inviteToOwnChannel(name) end)
+    menu:addOption(tr('Exclude from private chat'), function() g_game.excludeFromOwnChannel(name) end)
   end
 
   if not isHiddingOffline() then

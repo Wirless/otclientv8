@@ -1,0 +1,39 @@
+MainWindow
+  size: 256 128
+  !text: tr('Add VIP Group')
+  @onEnter: modules.game_viplist.addGroup()
+  @onEscape: modules.game_viplist.destroyAddGroupWindow()
+
+  Label
+    !text: tr('Please enter a group name:')
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+
+  TextEdit
+    id: groupName
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 4
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: next.top
+    margin-bottom: 10
+
+  Button
+    !text: tr('Ok')
+    width: 64
+    anchors.right: next.left
+    anchors.bottom: parent.bottom
+    margin-right: 10
+    @onClick: modules.game_viplist.addGroup()
+
+  Button
+    !text: tr('Cancel')
+    width: 64
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    @onClick: modules.game_viplist.destroyAddGroupWindow() 

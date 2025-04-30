@@ -10,6 +10,17 @@ VipListLabel < GameLabel
   $first:
     margin-top: 5
 
+VipGroupLabel < GameLabel
+  margin-top: 10
+  margin-bottom: 2
+  font: verdana-11px-monochrome
+  text-auto-resize: true
+  color: #daa520
+  phantom: false
+  
+  $first:
+    margin-top: 30
+
 MiniWindow
   id: vipWindow
   !text: tr('VIP List')
@@ -23,4 +34,5 @@ MiniWindow
     layout: verticalBox
     padding-left: 5
     padding-right: 5
+    margin-top: 5
     &onMousePress: modules.game_viplist.onVipListMousePress
